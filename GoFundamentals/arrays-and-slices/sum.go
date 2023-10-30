@@ -16,3 +16,17 @@ func SumAll(collectionsToSum ...[]int) []int {
 
 	return sums
 }
+
+func SumAllTails(collectionsToSum ...[]int) []int {
+	var sums []int
+	for _, numbers := range collectionsToSum {
+		if len(numbers) == 0 {
+			sums = append(sums, 0)
+		} else {
+			tail := numbers[1:]
+			sums = append(sums, Sum(tail))
+		}
+	}
+
+	return sums
+}
