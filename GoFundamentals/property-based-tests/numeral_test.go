@@ -66,14 +66,34 @@ func TestConvertingToArabic(t *testing.T) {
 }
 
 func TestPropertiesOfConversion(t *testing.T) {
+
 	assertion := func(arabic uint16) bool {
 		if arabic > 3999 {
 			return true
 		}
+
 		t.Log("testing", arabic)
 		roman := ConvertToRoman(arabic)
 		fromRoman := ConvertToArabic(roman)
-		return fromRoman == arabic
+		if fromRoman != arabic {
+			return false
+		}
+
+		var count uint8
+		var lastCharacter rune
+		for _, c := range roman {
+			if c != lastCharacter {
+				count = 1
+			} else {
+				count++
+			}
+			if count > 3 {
+				break
+			}
+			lastCharacter = c
+		}
+		return count <= 3
+
 	}
 
 	if err := quick.Check(assertion, &quick.Config{
