@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestRomanNumerals(t *testing.T) {
-	cases := []struct {
+var (
+	cases = []struct {
 		Arabic int
 		Roman  string
 	}{
@@ -37,6 +37,9 @@ func TestRomanNumerals(t *testing.T) {
 		{Arabic: 2014, Roman: "MMXIV"},
 		{Arabic: 3999, Roman: "MMMCMXCIX"},
 	}
+)
+
+func TestRomanNumerals(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(fmt.Sprintf("%d gets converted to %q", tt.Arabic, tt.Roman), func(t *testing.T) {
@@ -44,6 +47,18 @@ func TestRomanNumerals(t *testing.T) {
 
 			if got != tt.Roman {
 				t.Errorf("got %s, want %s", got, tt.Roman)
+			}
+		})
+	}
+}
+
+func TestConvertingToArabic(t *testing.T) {
+	for _, tt := range cases[:4] {
+		t.Run(fmt.Sprintf("%q gets converted to %d", tt.Roman, tt.Arabic), func(t *testing.T) {
+			got := ConvertToArabic(tt.Roman)
+
+			if got != tt.Arabic {
+				t.Errorf("got %d, want %d", got, tt.Arabic)
 			}
 		})
 	}
