@@ -66,6 +66,25 @@ func TestMinutesInRadians(t *testing.T) {
 	}
 }
 
+func TestMinuteHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(0, 30, 0), Point{0, -1}},
+		{simpleTime(0, 45, 0), Point{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(testName(c.time), func(t *testing.T) {
+			got := minuteHandPoint(c.time)
+			if !roughlyEqualPoint(got, c.point) {
+				t.Fatalf("wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+
 func simpleTime(hours, minutes, seconds int) time.Time {
 	return time.Date(312, time.October, 28, hours, minutes, seconds, 0, time.UTC)
 }
