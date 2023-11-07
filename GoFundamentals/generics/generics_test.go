@@ -15,7 +15,7 @@ func TestAssertFunctions(t *testing.T) {
 
 func TestStack(t *testing.T) {
 	t.Run("integer stack", func(t *testing.T) {
-		stackOfInts := new(StackOfInts)
+		stackOfInts := new(Stack[int])
 
 		// check stack is empty
 		AssertTrue(t, stackOfInts.IsEmpty())
@@ -34,7 +34,7 @@ func TestStack(t *testing.T) {
 	})
 
 	t.Run("string stack", func(t *testing.T) {
-		myStackOfStrings := new(StackOfStrings)
+		myStackOfStrings := new(Stack[string])
 
 		// check stack is empty
 		AssertTrue(t, myStackOfStrings.IsEmpty())
@@ -52,23 +52,23 @@ func TestStack(t *testing.T) {
 		AssertTrue(t, myStackOfStrings.IsEmpty())
 	})
 
-	t.Run("interface stack dx is horrid", func(t *testing.T) {
-		myStackOfInts := new(StackOfInts)
+	// t.Run("interface stack dx is horrid", func(t *testing.T) {
+	// 	myStackOfInts := new(StackOfInts)
 
-		myStackOfInts.Push(1)
-		myStackOfInts.Push(2)
-		firstNum, _ := myStackOfInts.Pop()
-		secondNum, _ := myStackOfInts.Pop()
+	// 	myStackOfInts.Push(1)
+	// 	myStackOfInts.Push(2)
+	// 	firstNum, _ := myStackOfInts.Pop()
+	// 	secondNum, _ := myStackOfInts.Pop()
 
-		// get our ints from out interface{}
-		reallyFirstNum, ok := firstNum.(int)
-		AssertTrue(t, ok) // need to check we definitely got an int out of the interface{}
+	// 	// get our ints from out interface{}
+	// 	reallyFirstNum, ok := firstNum.(int)
+	// 	AssertTrue(t, ok) // need to check we definitely got an int out of the interface{}
 
-		reallySecondNum, ok := secondNum.(int)
-		AssertTrue(t, ok) // and again!
+	// 	reallySecondNum, ok := secondNum.(int)
+	// 	AssertTrue(t, ok) // and again!
 
-		AssertEqual(t, reallyFirstNum+reallySecondNum, 3)
-	})
+	// 	AssertEqual(t, reallyFirstNum+reallySecondNum, 3)
+	// })
 }
 
 func AssertEqual[T comparable](t *testing.T, got, want T) {
