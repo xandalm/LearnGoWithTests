@@ -5,15 +5,15 @@ type Transaction struct {
 	Sum      float64
 }
 
-func BalanceFor(transaction []Transaction, name string) float64 {
-	var balance float64
-	for _, t := range transaction {
+func BalanceFor(transactions []Transaction, name string) float64 {
+	adjusteBalance := func(currentBalance float64, t Transaction) float64 {
 		if t.From == name {
-			balance -= t.Sum
+			currentBalance -= t.Sum
 		}
 		if t.To == name {
-			balance += t.Sum
+			currentBalance += t.Sum
 		}
+		return currentBalance
 	}
-	return balance
+	return Reduce(transactions, adjusteBalance, 0.0)
 }
