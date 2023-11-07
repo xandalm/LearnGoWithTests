@@ -14,6 +14,10 @@ type Post struct {
 	Tags                     []string
 }
 
+func (p *Post) SanitiseTitle() string {
+	return strings.ToLower(strings.Replace(p.Title, " ", "-", -1))
+}
+
 func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
