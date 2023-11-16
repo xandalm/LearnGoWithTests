@@ -14,13 +14,14 @@ const (
 
 func NewHandler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc(greetPath, func(w http.ResponseWriter, r *http.Request) {
-		name := r.URL.Query().Get("name")
-		fmt.Fprint(w, interactions.Greet(name))
-	})
-	mux.HandleFunc(cursePath, func(w http.ResponseWriter, r *http.Request) {
-		name := r.URL.Query().Get("name")
-		fmt.Fprint(w, interactions.Curse(name))
-	})
+	mux.HandleFunc(greetPath, replyWith(interactions.Greet))
+	mux.HandleFunc(cursePath, replyWith(interactions.Curse))
 	return mux
+}
+
+func replyWith(f func(name string) (interaction string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name := r.URL.Query().Get("name")
+		fmt.Fprint(w, f(name))
+	}
 }
