@@ -38,7 +38,7 @@ func (d *Driver) Curse(name string) (string, error) {
 		return "", err
 	}
 
-	greeting, err := client.Curse(context.Background(), &GreetRequest{
+	greeting, err := client.Curse(context.Background(), &CurseRequest{
 		Name: name,
 	})
 	if err != nil {
