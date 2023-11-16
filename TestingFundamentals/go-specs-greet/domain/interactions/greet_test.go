@@ -8,6 +8,14 @@ import (
 )
 
 func TestGreet(t *testing.T) {
+	t.Run("empty name", func(t *testing.T) {
+		got := interactions.Greet("")
+		want := "Hello, World"
+
+		if got != want {
+			t.Errorf("got %s, but want %s", got, want)
+		}
+	})
 	specifications.GreetSpecification(
 		t,
 		specifications.GreetAdapter(interactions.Greet),
