@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Player stores a name with a number of wins.
 type Player struct {
 	Name string
 	Wins int
@@ -25,6 +26,7 @@ type PlayerServer struct {
 	http.Handler
 }
 
+// NewPlayerServer creates a PlayerServer with routing configured.
 func NewPlayerServer(store PlayerStore) *PlayerServer {
 	p := new(PlayerServer)
 
