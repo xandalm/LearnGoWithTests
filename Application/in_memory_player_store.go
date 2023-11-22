@@ -30,3 +30,7 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 	defer i.mu.RUnlock()
 	return i.store[name]
 }
+
+func (i *InMemoryPlayerStore) GetLeague() []Player {
+	return nil
+}
