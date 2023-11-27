@@ -37,6 +37,7 @@ func (cli *CLI) readLine() string {
 
 const PlayerPrompt = "Please enter the number of players: "
 const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
+const BadWinnerInputMsg = "invalid winner input, expect format of 'PlayerName wins'"
 
 // PlayPoker starts the game.
 func (cli *CLI) PlayPoker() {
@@ -56,7 +57,7 @@ func (cli *CLI) PlayPoker() {
 	winner, err := extractWinner(winnerInput)
 
 	if err != nil {
-		fmt.Fprint(cli.out, "declared winner incorretly")
+		fmt.Fprint(cli.out, BadWinnerInputMsg)
 		return
 	}
 
@@ -65,7 +66,7 @@ func (cli *CLI) PlayPoker() {
 
 func extractWinner(userInput string) (string, error) {
 	if !strings.HasSuffix(userInput, " wins") {
-		return "", errors.New("invalid input, expected '{Name} wins'")
+		return "", errors.New(BadWinnerInputMsg)
 	}
 	return strings.Replace(userInput, " wins", "", 1), nil
 }

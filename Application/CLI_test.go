@@ -2,6 +2,7 @@ package poker_test
 
 import (
 	"bytes"
+	"io"
 	"poker"
 	"strings"
 	"testing"
@@ -27,9 +28,13 @@ func (s *SpyGame) Finish(winner string) {
 	s.FinishedWith = winner
 }
 
+func userSends(messages ...string) io.Reader {
+	return strings.NewReader(strings.Join(messages, "\n"))
+}
+
 func TestCLI(t *testing.T) {
 	t.Run("start game with 5 players and finish with 'Chris' as winner", func(t *testing.T) {
-		in := strings.NewReader("5\nChris wins\n")
+		in := userSends("5", "Chris wins")
 
 		game := &SpyGame{}
 
@@ -40,7 +45,7 @@ func TestCLI(t *testing.T) {
 		assertGameFinishedWith(t, game, "Chris")
 	})
 	t.Run("start game with 9 players and finish with 'Cleo' as winner", func(t *testing.T) {
-		in := strings.NewReader("9\nCleo wins\n")
+		in := userSends("9", "Cleo wins")
 
 		game := &SpyGame{}
 
@@ -63,16 +68,14 @@ func TestCLI(t *testing.T) {
 	})
 	t.Run("it prints an error when the winner is declared incorrectly", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
-		in := strings.NewReader("1\nLloyd is killer\n")
+		in := userSends("1", "Lloyd is killer")
 		game := &SpyGame{}
 
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
-		if game.FinishedWith != "" {
-			t.Error("game should not have finished")
-		}
-		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, "declared winner incorretly")
+		assertGameNotFinished(t, game)
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadWinnerInputMsg)
 	})
 }
 
@@ -108,5 +111,13 @@ func assertGameNotStarted(t testing.TB, game *SpyGame) {
 
 	if game.StartCalled {
 		t.Errorf("game should not have called")
+	}
+}
+
+func assertGameNotFinished(t testing.TB, game *SpyGame) {
+	t.Helper()
+
+	if game.FinishedWith != "" {
+		t.Error("game should not have finished")
 	}
 }
