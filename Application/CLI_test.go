@@ -37,18 +37,10 @@ func TestCLI(t *testing.T) {
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
-		gotPrompt := stdout.String()
-		wantPrompt := poker.PlayerPrompt
-
-		if gotPrompt != wantPrompt {
-			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
-		}
-
-		if game.StartedWith != 7 {
-			t.Errorf("wanted Start called with 7 but got %d", game.StartedWith)
-		}
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
+		assertGameStartedWith(t, game, 7)
 	})
-	t.Run("record Chris win from user input", func(t *testing.T) {
+	t.Run("start game with 5 players and finish with 'Chris' as winner", func(t *testing.T) {
 		in := strings.NewReader("5\nChris wins\n")
 
 		game := &SpyGame{}
@@ -56,21 +48,19 @@ func TestCLI(t *testing.T) {
 		cli := poker.NewCLI(in, dummyStdOut, game)
 		cli.PlayPoker()
 
-		if game.FinishedWith != "Chris" {
-			t.Errorf("expected finish called with 'Chris' but got %q", game.FinishedWith)
-		}
+		assertGameStartedWith(t, game, 5)
+		assertGameFinishedWith(t, game, "Chris")
 	})
-	t.Run("record cleo win from user input", func(t *testing.T) {
-		in := strings.NewReader("5\nCleo wins\n")
+	t.Run("start game with 9 players and finish with 'Cleo' as winner", func(t *testing.T) {
+		in := strings.NewReader("9\nCleo wins\n")
 
 		game := &SpyGame{}
 
 		cli := poker.NewCLI(in, dummyStdOut, game)
 		cli.PlayPoker()
 
-		if game.FinishedWith != "Cleo" {
-			t.Errorf("expected finish called with 'Cleo' but got %q", game.FinishedWith)
-		}
+		assertGameStartedWith(t, game, 9)
+		assertGameFinishedWith(t, game, "Cleo")
 	})
 	t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
@@ -80,15 +70,42 @@ func TestCLI(t *testing.T) {
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
-		if game.StartCalled {
-			t.Errorf("game should not have called")
-		}
-
-		gotPrompt := stdout.String()
-		wantPrompt := poker.PlayerPrompt + "you're so silly"
-
-		if gotPrompt != wantPrompt {
-			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
-		}
+		assertGameNotStarted(t, game)
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
 	})
+}
+
+func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...string) {
+	t.Helper()
+
+	got := stdout.String()
+	want := strings.Join(messages, "")
+
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func assertGameStartedWith(t testing.TB, game *SpyGame, numberOfPlayers int) {
+	t.Helper()
+
+	if game.StartedWith != numberOfPlayers {
+		t.Errorf("wanted Start called with %d but got %d", numberOfPlayers, game.StartedWith)
+	}
+}
+
+func assertGameFinishedWith(t testing.TB, game *SpyGame, winner string) {
+	t.Helper()
+
+	if game.FinishedWith != winner {
+		t.Errorf("expected finish called with %q but got %q", winner, game.FinishedWith)
+	}
+}
+
+func assertGameNotStarted(t testing.TB, game *SpyGame) {
+	t.Helper()
+
+	if game.StartCalled {
+		t.Errorf("game should not have called")
+	}
 }
