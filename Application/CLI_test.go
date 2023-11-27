@@ -28,18 +28,6 @@ func (s *SpyGame) Finish(winner string) {
 }
 
 func TestCLI(t *testing.T) {
-	t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
-		stdout := &bytes.Buffer{}
-		in := strings.NewReader("7\n")
-
-		game := &SpyGame{}
-
-		cli := poker.NewCLI(in, stdout, game)
-		cli.PlayPoker()
-
-		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt)
-		assertGameStartedWith(t, game, 7)
-	})
 	t.Run("start game with 5 players and finish with 'Chris' as winner", func(t *testing.T) {
 		in := strings.NewReader("5\nChris wins\n")
 
@@ -72,6 +60,19 @@ func TestCLI(t *testing.T) {
 
 		assertGameNotStarted(t, game)
 		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
+	})
+	t.Run("it prints an error when the winner is declared incorrectly", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("1\nLloyd is killer\n")
+		game := &SpyGame{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		if game.FinishedWith != "" {
+			t.Error("game should not have finished")
+		}
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, "declared winner incorretly")
 	})
 }
 
