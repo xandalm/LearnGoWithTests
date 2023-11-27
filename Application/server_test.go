@@ -54,7 +54,7 @@ func TestGETPlayers(t *testing.T) {
 
 			server.ServeHTTP(response, request)
 
-			assertStatus(t, response.Code, tt.expectedHTTPStatus)
+			assertStatus(t, response, tt.expectedHTTPStatus)
 			assertResponseBody(t, response.Body.String(), tt.expectedScore)
 		})
 	}
@@ -76,7 +76,7 @@ func TestStoreWins(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusAccepted)
+		assertStatus(t, response, http.StatusAccepted)
 
 		AssertPlayerWin(t, &store, player)
 
@@ -101,7 +101,7 @@ func TestLeague(t *testing.T) {
 			t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
 		}
 
-		assertStatus(t, response.Code, http.StatusOK)
+		assertStatus(t, response, http.StatusOK)
 	})
 	t.Run("it returns the league table as JSON", func(t *testing.T) {
 		wantedLeague := League{
@@ -119,7 +119,7 @@ func TestLeague(t *testing.T) {
 		server.ServeHTTP(response, request)
 		assertContentType(t, response, jsonContentType)
 		got := getLeagueFromResponse(t, response.Body)
-		assertStatus(t, response.Code, http.StatusOK)
+		assertStatus(t, response, http.StatusOK)
 		assertLeague(t, got, wantedLeague)
 	})
 }
@@ -128,13 +128,18 @@ func TestGame(t *testing.T) {
 	t.Run("GET /game returns 200", func(t *testing.T) {
 		server := NewPlayerServer(&StubPlayerStore{})
 
-		request, _ := http.NewRequest(http.MethodGet, "/game", nil)
+		request := newGameRequest()
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
 
-		assertStatus(t, response.Code, http.StatusOK)
+		assertStatus(t, response, http.StatusOK)
 	})
+}
+
+func newGameRequest() *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/game", nil)
+	return req
 }
 
 func newPostWinRequest(name string) *http.Request {
@@ -175,10 +180,10 @@ func assertResponseBody(t testing.TB, got, want string) {
 	}
 }
 
-func assertStatus(t testing.TB, got, want int) {
+func assertStatus(t testing.TB, response *httptest.ResponseRecorder, want int) {
 	t.Helper()
-	if got != want {
-		t.Errorf("did not get correct status, got %d but want %d", got, want)
+	if response.Code != want {
+		t.Errorf("did not get correct status, got %d but want %d", response.Code, want)
 	}
 }
 
