@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-type Game interface {
-	Start(numberOfPlayers int)
-	Finish(winner string)
-}
-
 // CLI helps players through a game of poker.
 type CLI struct {
 	in   *bufio.Scanner
