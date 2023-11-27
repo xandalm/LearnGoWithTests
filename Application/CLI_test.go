@@ -13,11 +13,13 @@ var dummyStdIn = &bytes.Buffer{}
 var dummyStdOut = &bytes.Buffer{}
 
 type SpyGame struct {
+	StartCalled  bool
 	StartedWith  int
 	FinishedWith string
 }
 
 func (s *SpyGame) Start(numberOfPlayers int) {
+	s.StartCalled = true
 	s.StartedWith = numberOfPlayers
 }
 
@@ -68,6 +70,18 @@ func TestCLI(t *testing.T) {
 
 		if game.FinishedWith != "Cleo" {
 			t.Errorf("expected finish called with 'Cleo' but got %q", game.FinishedWith)
+		}
+	})
+	t.Run("it prints an error when a non numeric value is entered and does not start the game", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		in := strings.NewReader("Pies\n")
+		game := &SpyGame{}
+
+		cli := poker.NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		if game.StartCalled {
+			t.Errorf("game should not have called")
 		}
 	})
 }
