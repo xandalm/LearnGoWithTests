@@ -8,22 +8,24 @@ import (
 	"strings"
 )
 
+type Game interface {
+	Start(numberOfPlayers int)
+	Finish(winner string)
+}
+
 // CLI helps players through a game of poker.
 type CLI struct {
 	in   *bufio.Scanner
 	out  io.Writer
-	game *Game
+	game Game
 }
 
 // NewCLI creates a CLI for playing poker.
-func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
+func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
 	return &CLI{
-		in:  bufio.NewScanner(in),
-		out: out,
-		game: &Game{
-			alerter: alerter,
-			store:   store,
-		},
+		in:   bufio.NewScanner(in),
+		out:  out,
+		game: game,
 	}
 }
 
