@@ -6,6 +6,7 @@ import (
 	"poker"
 	"strings"
 	"testing"
+	"time"
 )
 
 var dummyBlindAlerter = &poker.SpyBlindAlerter{}
@@ -96,7 +97,11 @@ func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...st
 func assertGameStartedWith(t testing.TB, game *SpyGame, numberOfPlayers int) {
 	t.Helper()
 
-	if game.StartedWith != numberOfPlayers {
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.StartedWith == numberOfPlayers
+	})
+
+	if !passed {
 		t.Errorf("wanted Start called with %d but got %d", numberOfPlayers, game.StartedWith)
 	}
 }
@@ -104,9 +109,23 @@ func assertGameStartedWith(t testing.TB, game *SpyGame, numberOfPlayers int) {
 func assertGameFinishedWith(t testing.TB, game *SpyGame, winner string) {
 	t.Helper()
 
-	if game.FinishedWith != winner {
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishedWith == winner
+	})
+
+	if !passed {
 		t.Errorf("expected finish called with %q but got %q", winner, game.FinishedWith)
 	}
+}
+
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
 }
 
 func assertGameNotStarted(t testing.TB, game *SpyGame) {

@@ -160,14 +160,9 @@ func TestGame(t *testing.T) {
 		writeWSMessage(t, ws, "3")
 		writeWSMessage(t, ws, winner)
 
-		const tenMS = 10 * time.Millisecond
-		// Because there is a delay between our WebSocket connection reading the message
-		// and recording the win and our test finishes before it happens.
-		time.Sleep(tenMS)
-
 		assertGameStartedWith(t, game, 3)
 		assertGameFinishedWith(t, game, winner)
-		within(t, tenMS, func() { assertWebSocketGotMsg(t, ws, wantedBlindAlert) })
+		within(t, 10*time.Millisecond, func() { assertWebSocketGotMsg(t, ws, wantedBlindAlert) })
 	})
 }
 
