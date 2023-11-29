@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -28,12 +30,13 @@ type PlayerServer struct {
 	store PlayerStore
 	http.Handler
 	template *template.Template
+	game     Game
 }
 
 const htmlTemplatePath = "game.html"
 
 // NewPlayerServer creates a PlayerServer with routing configured.
-func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
+func NewPlayerServer(store PlayerStore, game Game) (*PlayerServer, error) {
 	p := new(PlayerServer)
 
 	tmpl, err := template.ParseFiles(htmlTemplatePath)
@@ -41,6 +44,7 @@ func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
 		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
 	}
 
+	p.game = game
 	p.template = tmpl
 	p.store = store
 
@@ -85,8 +89,13 @@ var wsUpgrader = websocket.Upgrader{
 
 func (p *PlayerServer) webSocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn, _ := wsUpgrader.Upgrade(w, r, nil)
+
+	_, numberOfPlayersMsg, _ := conn.ReadMessage()
+	numberOfPlayers, _ := strconv.Atoi(string(numberOfPlayersMsg))
+	p.game.Start(numberOfPlayers, io.Discard) // todo: Don't discard the blinds messages!
+
 	_, winnerMsg, _ := conn.ReadMessage()
-	p.store.RecordWin(string(winnerMsg))
+	p.game.Finish(string(winnerMsg))
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
