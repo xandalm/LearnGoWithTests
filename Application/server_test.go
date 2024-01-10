@@ -1,4 +1,4 @@
-package main
+package poker
 
 import (
 	"encoding/json"
@@ -9,25 +9,6 @@ import (
 	"reflect"
 	"testing"
 )
-
-type StubPlayerStore struct {
-	scores   map[string]int
-	winCalls []string
-	league   League
-}
-
-func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	score := s.scores[name]
-	return score
-}
-
-func (s *StubPlayerStore) RecordWin(name string) {
-	s.winCalls = append(s.winCalls, name)
-}
-
-func (s *StubPlayerStore) GetLeague() League {
-	return s.league
-}
 
 func TestGETPlayers(t *testing.T) {
 	store := StubPlayerStore{
@@ -97,13 +78,7 @@ func TestStoreWins(t *testing.T) {
 
 		assertStatus(t, response.Code, http.StatusAccepted)
 
-		if len(store.winCalls) != 1 {
-			t.Errorf("got %d calls to RecordWin, want %d", len(store.winCalls), 1)
-		}
-
-		if store.winCalls[0] != player {
-			t.Errorf("did not store correct winner, got %q but want %q", store.winCalls[0], player)
-		}
+		AssertPlayerWin(t, &store, player)
 
 	})
 }
@@ -142,7 +117,7 @@ func TestLeague(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
-		asserContentType(t, response, jsonContentType)
+		assertContentType(t, response, jsonContentType)
 		got := getLeagueFromResponse(t, response.Body)
 		assertStatus(t, response.Code, http.StatusOK)
 		assertLeague(t, got, wantedLeague)
@@ -194,7 +169,7 @@ func assertStatus(t testing.TB, got, want int) {
 	}
 }
 
-func asserContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
+func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
 	t.Helper()
 	if response.Result().Header.Get("content-type") != want {
 		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)

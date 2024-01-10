@@ -1,3 +1,3 @@
-module playerscore
+module poker
 
 go 1.21.3
