@@ -2,43 +2,44 @@ package poker
 
 import (
 	"fmt"
+	"io"
 	"testing"
 	"time"
 )
 
 // StubPlayerStore implements PlayerStore for testing purposes.
 type StubPlayerStore struct {
-	scores   map[string]int
-	winCalls []string
-	league   League
+	Scores   map[string]int
+	WinCalls []string
+	League   League
 }
 
 // GetPlayerScore returns a score from Scores.
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	score := s.scores[name]
+	score := s.Scores[name]
 	return score
 }
 
 // RecordWin will record a win to WinCalls.
 func (s *StubPlayerStore) RecordWin(name string) {
-	s.winCalls = append(s.winCalls, name)
+	s.WinCalls = append(s.WinCalls, name)
 }
 
 // GetLeague returns League.
 func (s *StubPlayerStore) GetLeague() League {
-	return s.league
+	return s.League
 }
 
 // AssertPlayerWin allows you to spy on the store's calls to RecordWin.
 func AssertPlayerWin(t *testing.T, store *StubPlayerStore, winner string) {
 	t.Helper()
 
-	if len(store.winCalls) != 1 {
+	if len(store.WinCalls) != 1 {
 		t.Fatalf("expected a win call but didn't get any")
 	}
 
-	if store.winCalls[0] != winner {
-		t.Errorf("didn't record correct winner, got %q but want %q", store.winCalls[0], winner)
+	if store.WinCalls[0] != winner {
+		t.Errorf("didn't record correct winner, got %q but want %q", store.WinCalls[0], winner)
 	}
 }
 
@@ -58,6 +59,21 @@ type SpyBlindAlerter struct {
 }
 
 // ScheduleAlertAt records alerts that have been scheduled.
-func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int) {
+func (s *SpyBlindAlerter) ScheduleAlertAt(duration time.Duration, amount int, to io.Writer) {
 	s.Alerts = append(s.Alerts, ScheduledAlert{duration, amount})
+}
+
+type SpyGame struct {
+	StartCalled  bool
+	StartedWith  int
+	FinishedWith string
+}
+
+func (s *SpyGame) Start(numberOfPlayers int, alertsDestination io.Writer) {
+	s.StartCalled = true
+	s.StartedWith = numberOfPlayers
+}
+
+func (s *SpyGame) Finish(winner string) {
+	s.FinishedWith = winner
 }
