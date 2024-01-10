@@ -1,6 +1,8 @@
 package main
 
-import "sync"
+import (
+	"sync"
+)
 
 // NewInMemoryPlayerStore initialises an empty player store.
 func NewInMemoryPlayerStore() *InMemoryPlayerStore {
@@ -29,4 +31,13 @@ func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
 	return i.store[name]
+}
+
+// GetLeague returns a collection of Players.
+func (i *InMemoryPlayerStore) GetLeague() []Player {
+	var league []Player
+	for name, wins := range i.store {
+		league = append(league, Player{name, wins})
+	}
+	return league
 }
